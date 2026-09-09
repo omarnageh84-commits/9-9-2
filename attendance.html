@@ -1,0 +1,119 @@
+<!DOCTYPE html><html lang="ar" dir="rtl"><head><script src="themes.js"></script><style>
+@font-face{font-family:"Optimistic";font-style:normal;font-weight:400 600;font-display:swap;src:url("/fonts/OptimisticAI_VF_Optimized.woff2") format("woff2")}
+@font-face{font-family:"Optimistic Mono";font-style:normal;font-weight:400;font-display:swap;src:url("/fonts/OptimisticMono_W_TextRegular.woff2") format("woff2")}
+:where(html){font-family:"Optimistic",system-ui,sans-serif}
+:where(code,pre,kbd,samp){font-family:"Optimistic Mono",ui-monospace,monospace}
+</style><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@700;800;900&family=JetBrains+Mono:wght@700&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;font-family:'Tajawal',sans-serif}
+html,body{overflow-x:hidden;background:var(--bg);color:var(--text)}
+body{padding:0 6px 90px 6px;min-height:100dvh;margin:0;}
+.en{font-family:'JetBrains Mono',monospace!important;direction:ltr!important;text-align:center}
+.card{background:var(--card);border:1px solid var(--card-border);border-radius:9px;padding:7px 8px;width:100%}
+#frozenTop{position:sticky;top:0;z-index:30;background:var(--bg);padding:4px 6px 3px 6px;}
+.stats{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:3px;margin:4px 0 0 0}
+.stat{border-radius:8px;padding:6px 2px;border:1px solid var(--card-border);text-align:center;background:var(--card)}
+.stat small{font-size:7.5px;font-weight:700;opacity:.8;display:block;color:var(--text-soft);line-height:1}
+.stat b,.stat input{font-size:10.4px!important;font-weight:900;color:var(--text);line-height:1.2}
+.time-box{width:90%;border:1px solid var(--card-border);border-radius:6px;padding:5px 1px;text-align:center;font-size:9.3px;background:var(--bg);color:var(--text);outline:none;font-weight:800}
+.time-box.filled{background:var(--hero)!important;color:#fff!important;border-color:var(--hero)!important}
+.time-box.half{background:var(--bg-soft)!important;border-color:var(--hero)!important;color:var(--hero)!important}
+.note-box{width:92%;border:1px dashed var(--card-border);border-radius:6px;padding:4px 2px;font-size:8px;background:var(--bg);color:var(--text);outline:none;text-align:center}
+.table-wrap{background:var(--card);border:1px solid var(--card-border);border-radius:9px;overflow:hidden;width:100%;margin:4px 0}
+.table-head{display:grid;grid-template-columns:0.85fr 0.58fr 0.58fr 0.4fr 0.5fr 0.85fr 0.25fr 0.25fr;gap:0;background:var(--bg-soft);font-size:7.5px;font-weight:800;padding:6px 2px;text-align:center;color:var(--text-soft);border-bottom:1px solid var(--card-border);}
+.row-item{display:grid;grid-template-columns:0.85fr 0.58fr 0.58fr 0.4fr 0.5fr 0.85fr 0.25fr 0.25fr;gap:0;align-items:center;padding:4px 1px;border-bottom:1px solid var(--bg-soft);background:var(--card)}
+.row-item.done{border-right:2px solid var(--hero)}
+.clear-btn{border:none;background:#FFF1F2;color:#ef4444;width:18px;height:18px;border-radius:5px;font-size:9px;cursor:pointer;border:1px solid #FECDD3;display:flex;align-items:center;justify-content:center}
+</style></head><body>
+<div id="frozenTop">
+<div class="card" style="display:flex;justify-content:space-between;align-items:center;padding:6px 8px">
+<div style="display:flex;gap:4px;align-items:center"><div style="font-size:9px;font-weight:900">⏱️ الحضور</div></div>
+<div style="display:flex;gap:2px;align-items:center">
+<div id="syncStatus" class="en" style="font-size:7.5px;background:var(--bg-soft);color:var(--text-soft);padding:2px 6px;border-radius:999px">☁️ متزامن</div>
+<div id="monthLabel" class="en" style="font-size:8.5px;background:var(--hero);color:#fff;padding:2px 6px;border-radius:999px;font-weight:900">9 / 2026</div><button onclick="changeMonth(-1)" style="background:var(--card);border:1px solid var(--card-border);width:21px;height:21px;border-radius:5px;font-weight:900;font-size:11px">‹</button><button onclick="changeMonth(1)" style="background:var(--card);border:1px solid var(--card-border);width:21px;height:21px;border-radius:5px;font-weight:900;font-size:11px">›</button><div id="clock" class="en" style="font-size:7.5px;background:var(--bg-soft);padding:2px 5px;border-radius:999px">00:00:00</div></div>
+</div>
+<div class="stats">
+<div class="stat"><small>سعر الساعة</small><b id="outPrice" class="en">0</b></div>
+<div class="stat"><small>الساعة</small><input id="v1" type="tel" class="en" value="1,200" onfocus="this.select()" onblur="fmtField(this);calcTotals(); saveToDrive()" oninput="calcTotals()" style="width:100%;border:none;background:transparent;text-align:center;outline:none"></div>
+<div class="stat"><small>كم يوم</small><input id="v2" type="tel" class="en" value="26" onfocus="this.select()" oninput="calcTotals(); saveToDrive()" style="width:100%;border:none;background:transparent;text-align:center;outline:none"></div>
+<div class="stat"><small>عدد الساعات</small><b id="outTotal" class="en">0</b></div>
+<div class="stat"><small>الصافي</small><b id="outSafi" class="en">0</b></div>
+<div class="stat"><small>الديون</small><input id="v4" type="tel" class="en" value="0" onfocus="this.select()" onblur="fmtField(this);calcTotals()" oninput="calcTotals(); saveToDrive()" style="width:100%;border:none;background:transparent;text-align:center;outline:none"></div>
+<div class="stat"><small>المطلوب</small><input id="v3" type="tel" class="en" value="15,000" onfocus="this.select()" onblur="fmtField(this);calcTotals()" oninput="calcTotals(); saveToDrive()" style="width:100%;border:none;background:transparent;text-align:center;outline:none"></div>
+<div class="stat"><small>المطلوب يومياً</small><b id="outDaily" class="en">0</b></div>
+</div>
+</div>
+<div id="days" class="table-wrap"><div class="table-head"><div>اليوم</div><div>دخول</div><div>خروج</div><div>س</div><div>ج</div><div>ملاحظة</div><div>أ</div><div>✕</div></div><div id="list"></div></div>
+
+<script>
+let curY=new Date().getFullYear(), curM=new Date().getMonth();
+let data=JSON.parse(localStorage.getItem('att_fixed_final')||'{}');
+let hols=JSON.parse(localStorage.getItem('att_hols_fixed')||'{}');
+let notes=JSON.parse(localStorage.getItem('att_notes')||'{}');
+function toEn(s){ return (s+'').replace(/[٠-٩]/g,d=> '0123456789'['٠١٢٣٤٥٦٧٨٩'.indexOf(d)] ).replace(/[^0-9:.,-]/g,''); }
+function fmtField(el){ try{ let v=toEn(el.value).replace(/,/g,''); if(!v) return; let n=parseFloat(v); if(!isNaN(n)) el.value=n.toLocaleString('en-US'); }catch(e){} }
+function selectAll(el){ try{ el.select(); }catch(e){} }
+function calcDiff(a,b){ if(!a||!b) return 0; let parse=t=>{ let parts=(t+'').split(':'); let h=parseFloat(parts[0])||0; let m=parseFloat(parts[1])||0; return h + m/60; }; let diff=parse(b)-parse(a); if(diff<0) diff+=24; return diff; }
+function changeMonth(d){ curM+=d; if(curM>11){curM=0;curY++;} if(curM<0){curM=11;curY--;} renderAll(); }
+function renderAll(){
+  document.getElementById('monthLabel').textContent=(curM+1)+' / '+curY;
+  let dim=new Date(curY,curM+1,0).getDate();
+  let price=parseFloat(toEn(document.getElementById('v1').value))||0; let v2=parseFloat(toEn(document.getElementById('v2').value))||1; price=v2?price/v2:0;
+  let html='';
+  for(let i=1;i<=dim;i++){
+    let key=`${curY}-${curM+1}-${i}`;
+    let rec=data[key]||{in:'',out:''};
+    let isHol=hols[key];
+    let hours=calcDiff(rec.in,rec.out);
+    let dayAr=['أحد','إثنين','ثلاثاء','أربعاء','خميس','جمعة','سبت'][new Date(curY,curM,i).getDay()];
+    let noteVal=notes[key]||'';
+    let isDone=rec.in&&rec.out&&!isHol;
+    let inClass=rec.in?(isDone?'filled':'half'):'';
+    let outClass=rec.out?(isDone?'filled':'half'):'';
+    let dailyMoney = hours && price ? Math.round(hours*price) : 0;
+    html+=`<div class="row-item ${isDone?'done':''}"><div style="font-size:8px;font-weight:800;white-space:nowrap">${dayAr} <span class="en" style="font-size:6.5px;color:var(--text-soft)">(${i})</span></div><input id="in-${key}" type="tel" class="time-box en ${inClass}" value="${rec.in}" placeholder="7" ${isHol?'disabled':''} onfocus="selectAll(this)" oninput="saveD('${key}','in',this.value)"><input id="out-${key}" type="tel" class="time-box en ${outClass}" value="${rec.out}" placeholder="19" ${isHol?'disabled':''} onfocus="selectAll(this)" oninput="saveD('${key}','out',this.value)"><div id="h-${key}" class="en" style="font-size:8.2px;font-weight:900">${isHol?'-':hours?hours.toFixed(2):'-'}</div><div id="s-${key}" class="en" style="font-size:8px;font-weight:900">${isHol?'-':dailyMoney?dailyMoney.toLocaleString('en-US'):'-'}</div><input id="note-${key}" type="text" class="note-box" value="${noteVal}" onfocus="selectAll(this)" oninput="saveNote('${key}',this.value)"><button onclick="toggleHol('${key}')" style="border:none;background:${isHol?'var(--hero)':'var(--bg-soft)'};width:18px;height:18px;border-radius:4px;font-size:8px;color:${isHol?'#fff':'var(--text-soft)'};border:1px solid var(--card-border)">${isHol?'✓':'○'}</button><button class="clear-btn" onclick="clearDay('${key}')">✕</button></div>`;
+  }
+  document.getElementById('list').innerHTML=html;
+  calcTotals();
+}
+function clearDay(k){ data[k]={in:'',out:''}; localStorage.setItem('att_fixed_final',JSON.stringify(data)); if(window.saveToDrive) saveToDrive(); renderAll(); }
+function saveD(k,t,v){
+  let clean=toEn(v);
+  if(!data[k]) data[k]={in:'',out:''};
+  data[k][t]=clean;
+  localStorage.setItem('att_fixed_final',JSON.stringify(data));
+  if(window.saveToDrive) saveToDrive(); // ده دلوقتي debounced 700ms فمش هيعلق
+  calcTotals();
+  // update row live without full render
+  let h=calcDiff(data[k].in,data[k].out);
+  let hEl=document.getElementById('h-'+k);
+  if(hEl) hEl.innerText=h?h.toFixed(2):'-';
+}
+function saveNote(k,v){notes[k]=v;localStorage.setItem('att_notes',JSON.stringify(notes)); if(window.saveToDrive) saveToDrive();}
+function toggleHol(k){if(hols[k]) delete hols[k]; else hols[k]=true;localStorage.setItem('att_hols_fixed',JSON.stringify(hols)); if(window.saveToDrive) saveToDrive(); renderAll();}
+function calcTotals(){
+  let v1=parseFloat(toEn(document.getElementById('v1').value))||0;
+  let v2=parseFloat(toEn(document.getElementById('v2').value))||1;
+  let total=0;
+  Object.entries(data).forEach(([k,r])=>{
+    let [yy,mm]=k.split('-').map(Number);
+    if(yy===curY&&mm===curM+1&&!hols[k]) total+=calcDiff(r.in,r.out);
+  });
+  const price=v2?v1/v2:0;
+  const v3=parseFloat(toEn(document.getElementById('v3').value))||0;
+  const debts=parseFloat(toEn(document.getElementById('v4').value))||0;
+  document.getElementById('outPrice').innerText=price?price.toFixed(2):'0';
+  document.getElementById('outTotal').innerText=total.toFixed(2);
+  let safi = (total*price) - debts;
+  document.getElementById('outSafi').innerText=Math.round(safi).toLocaleString('en-US');
+  document.getElementById('outDaily').innerText=price&&v2?(v3/price/v2).toFixed(2):'0.00';
+}
+window.renderAll=renderAll;
+window.initApp=function(){ data=JSON.parse(localStorage.getItem('att_fixed_final')||'{}'); hols=JSON.parse(localStorage.getItem('att_hols_fixed')||'{}'); notes=JSON.parse(localStorage.getItem('att_notes')||'{}'); renderAll(); };
+setInterval(()=>{const el=document.getElementById('clock');if(el) el.innerText=new Date().toLocaleTimeString('en-GB',{hour12:false});},1000);
+renderAll();
+</script>
+<script src="drive.js"></script>
+<script src="drive-sync.js"></script>
+</body></html>

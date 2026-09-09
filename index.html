@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,maximum-scale=1,user-scalable=no">
+<link rel="manifest" href="manifest.json?v=19">
+<meta name="theme-color" content="#0F766E">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{ --bg:#F0FDFA; --bg-soft:#CCFBF1; --card:#FFFFFF; --card-border:#5EEAD4; --text:#134E4A; --text-soft:#0D9488; --hero:#0F766E; --nav-bg: rgba(255,255,255,0.92); }
+*{box-sizing:border-box;margin:0;padding:0;font-family:'IBM Plex Sans Arabic',sans-serif;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;background:var(--bg);overflow:hidden;overscroll-behavior:none}
+body{display:flex;justify-content:center;align-items:flex-start;background:var(--bg);}
+.phone-shell{ width:100%; max-width:430px; height:100dvh; height:100svh; background:var(--bg); position:relative; overflow:hidden; display:flex; flex-direction:column; }
+@media(min-width:500px){ .phone-shell{ margin-top:12px; height:calc(100dvh - 24px); border-radius:28px; border:8px solid #111; box-shadow:0 0 0 1px var(--card-border), 0 25px 80px -20px rgba(0,0,0,.4); } }
+.header{height:56px; background:var(--card); border-bottom:1.5px solid var(--card-border); display:flex; align-items:center; justify-content:space-between; padding:0 14px; flex-shrink:0; padding-top:env(safe-area-inset-top)}
+.theme-toggle{width:42px; height:28px; background:var(--bg-soft); border:1.5px solid var(--card-border); border-radius:99px; position:relative; cursor:pointer; display:flex; align-items:center; padding:2px}
+.theme-toggle .knob{width:22px; height:22px; background:var(--hero); border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:12px; transition:.25s}
+.theme-toggle.dark .knob{transform:translateX(-12px); background:#1E293B}
+.pageWrap{flex:1;position:relative;background:var(--bg);overflow:hidden}
+.page{position:absolute;inset:0;width:100%;height:100%;border:none;opacity:0;pointer-events:none;transition:opacity .22s;background:var(--bg);-webkit-overflow-scrolling:touch}
+.page.active{opacity:1;pointer-events:auto;z-index:2}
+.nav{ height:72px; margin:10px; margin-bottom:calc(10px + env(safe-area-inset-bottom)); background:var(--nav-bg); backdrop-filter:blur(24px); border:1.5px solid var(--card-border); border-radius:20px; display:flex;align-items:center;padding:6px;gap:5px;z-index:30; flex-shrink:0 }
+.nav button{flex:1;height:100%;border:none;background:transparent;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;border-radius:14px;color:var(--text-soft);font-size:10px;font-weight:700;cursor:pointer;touch-action:manipulation}
+.nav button.active{background:var(--hero);color:#fff}
+.nav button .icon{font-size:19px}
+#syncStatus{position:absolute;top:60px;left:10px;right:10px;z-index:20;text-align:center;pointer-events:none;font-size:9px;color:var(--text-soft)}
+/* زر المسح */
+#clearCacheBtn{position:absolute;top:10px;left:10px;z-index:50;background:#fef2f2;color:#ef4444;border:1px solid #fecaca;border-radius:8px;padding:4px 8px;font-size:8px;font-weight:900;display:none}
+</style>
+</head>
+<body>
+<div class="phone-shell">
+  <div class="header">
+    <b>نظام عمر</b>
+    <div style="display:flex;gap:8px;align-items:center">
+      <button id="clearCacheBtn" onclick="clearAllCache()">مسح الكاش</button>
+      <div class="theme-toggle" id="themeToggle" onclick="toggleTheme()"><div class="knob" id="themeKnob">☀️</div></div>
+    </div>
+  </div>
+  <div id="syncStatus"></div>
+  <div class="pageWrap">
+    <iframe data-page="daily.html" src="daily.html?v=19" class="page active" title="daily" id="frame-daily"></iframe>
+    <iframe data-page="attendance.html" src="about:blank" class="page" title="attendance" id="frame-att"></iframe>
+    <iframe data-page="tasks.html" src="about:blank" class="page" title="tasks" id="frame-tasks"></iframe>
+  </div>
+  <nav class="nav">
+    <button class="active" data-page="daily.html" onclick="switchPage('daily.html',this)"><span class="icon">📊</span><span>اليومية</span></button>
+    <button data-page="attendance.html" onclick="switchPage('attendance.html',this)"><span class="icon">⏱️</span><span>الحضور</span></button>
+    <button data-page="tasks.html" onclick="switchPage('tasks.html',this)"><span class="icon">✓</span><span>المهام</span></button>
+  </nav>
+</div>
+<script src="drive.js?v=19"></script>
+<script src="drive-sync.js?v=19"></script>
+<script>
+// لو فيه كاش قديم عالق على الموبايل - اظهر زر المسح
+try{
+  if(localStorage.getItem('omar_old_cache_detected')){
+    document.getElementById('clearCacheBtn').style.display='block';
+  }
+}catch(e){}
+
+function clearAllCache(){
+  if(!confirm('امسح الكاش القديم واعمل ريفرش؟')) return;
+  try{
+    if('caches' in window){
+      caches.keys().then(k=>k.forEach(cache=>caches.delete(cache)));
+    }
+    if('serviceWorker' in navigator){
+      navigator.serviceWorker.getRegistrations().then(rs=>rs.forEach(r=>r.unregister()));
+    }
+    localStorage.removeItem('omar_old_cache_detected');
+    location.reload(true);
+  }catch(e){ location.reload(true); }
+}
+
+const themes = {
+  teal: {'--bg':'#F0FDFA','--bg-soft':'#CCFBF1','--card':'#FFFFFF','--card-border':'#5EEAD4','--text':'#134E4A','--text-soft':'#0D9488','--hero':'#0F766E','--nav-bg':'rgba(255,255,255,0.92)'},
+  dark: {'--bg':'#020617','--bg-soft':'#1E293B','--card':'#0F172A','--card-border':'#1E293B','--text':'#F1F5F9','--text-soft':'#94A3B8','--hero':'#0F766E','--nav-bg':'rgba(15,23,42,0.92)'}
+};
+function applyTheme(name, broadcast=true){
+  const t = themes[name] || themes.teal;
+  Object.entries(t).forEach(([k,v])=> document.documentElement.style.setProperty(k,v));
+  try{ localStorage.setItem('omar_theme', name); }catch(e){}
+  document.body.dataset.theme = name;
+  const toggle = document.getElementById('themeToggle');
+  const knob = document.getElementById('themeKnob');
+  if(toggle){ toggle.className = 'theme-toggle' + (name==='dark'?' dark':''); }
+  if(knob){ knob.textContent = name==='dark'?'🌙':'☀️'; }
+  if(broadcast){
+    document.querySelectorAll('iframe.page').forEach(f=>{
+      try{
+        if(f.contentWindow && f.contentWindow.applyTheme) f.contentWindow.applyTheme(name, false);
+        else if(f.contentWindow) Object.entries(t).forEach(([k,v])=> f.contentWindow.document.documentElement.style.setProperty(k,v));
+      }catch(e){}
+    });
+  }
+}
+function toggleTheme(){
+  const cur = localStorage.getItem('omar_theme')||'teal';
+  const next = cur==='teal' ? 'dark' : 'teal';
+  applyTheme(next, true);
+}
+window.applyTheme = applyTheme;
+
+const frames=document.querySelectorAll('.page');
+let currentPage='daily.html';
+function switchPage(name,btn){
+  if(currentPage===name) return;
+  currentPage=name;
+  frames.forEach(f=>{
+    const is=f.dataset.page===name;
+    f.classList.toggle('active',is);
+    if(is && f.src.includes('about:blank')){
+      f.src=name+"?v=19";
+      f.onload=()=>{ try{ const cur=localStorage.getItem('omar_theme')||'teal'; if(f.contentWindow && f.contentWindow.applyTheme) f.contentWindow.applyTheme(cur,false); }catch(e){} };
+    }
+  });
+  document.querySelectorAll('.nav button').forEach(b=>b.classList.remove('active'));
+  if(btn) btn.classList.add('active');
+}
+
+applyTheme(localStorage.getItem('omar_theme')||'teal');
+
+// تسجيل السيرفس ووركر الجديد وامسح القديم
+if('serviceWorker' in navigator){
+  navigator.serviceWorker.getRegistrations().then(rs=>{
+    rs.forEach(r=>{
+      if(r.active && r.active.scriptURL && !r.active.scriptURL.includes('v19')){
+        try{ r.unregister(); localStorage.setItem('omar_old_cache_detected','1'); document.getElementById('clearCacheBtn').style.display='block'; }catch(e){}
+      }
+    });
+  });
+  navigator.serviceWorker.register('./sw.js?v=19').then(()=>console.log('SW v19')).catch(()=>{});
+}
+
+// مزامنة خلفية بدون block
+window.addEventListener('load', ()=>{
+  setTimeout(()=>{
+    try{
+      if(window.SCRIPT_URL){
+        fetch(window.SCRIPT_URL + "?fileName=all_project_data.json&t=" + Date.now())
+        .then(r=>r.json()).then(json=>{
+          let payload = json.data || json;
+          let content = payload.content || payload;
+          if(content && content.daily){
+            localStorage.setItem('omar_tx_v3', JSON.stringify(content.daily));
+            try{
+              let f=document.getElementById('frame-daily');
+              if(f && f.contentWindow && f.contentWindow.refreshCurrent) f.contentWindow.refreshCurrent();
+            }catch(e){}
+          }
+        }).catch(e=>{});
+      }
+    }catch(e){}
+  }, 1200);
+});
+
+window.switchPage=switchPage;
+</script>
+</body>
+</html>
