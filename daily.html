@@ -247,21 +247,8 @@ function editFixedName(id,val){let it=getFixedForMonth(curYM).find(x=>x.id===id)
 function editFixedAmount(id,val){let num=Number(val.replace(/[^0-9]/g,''))||0;let it=getFixedForMonth(curYM).find(x=>x.id===id);if(it)it.amount=num;persistFixed();document.getElementById('fixedTotalBadge').textContent=getFixedForMonth(curYM).reduce((a,b)=>a+(Number(b.amount)||0),0).toLocaleString()+' ج';renderStats(curTab);}
 function openFixedModal(){document.getElementById('fixedNameInput').value='';document.getElementById('fixedAmountInput').value='';document.getElementById('fixedModal').classList.add('open');}
 function closeFixedModal(){document.getElementById('fixedModal').classList.remove('open');}
+function saveFixedToTotal(){ persistFixed(); let fl=getFixedForMonth(curYM); fl.forEach(f=>{ if(!masterBands.find(b=>b.name===f.name && b.section==="expense")) masterBands.push({id:f.id,name:f.name,section:"expense"}); }); persist(); renderStats(curTab); renderTotal(); toast("✅ اتحفظت في الإجمالي"); switchTab("total"); }
 function confirmFixedModal(){let name=document.getElementById('fixedNameInput').value.trim();let amount=Number(document.getElementById('fixedAmountInput').value.replace(/[^0-9]/g,''))||0;if(!name){toast('اكتب اسم البند','err');return;}let id=Date.now().toString();fixedTemplates.push({id,name,def:amount});getFixedForMonth(curYM).push({id,name,amount});persistFixed();closeFixedModal();renderFixedSection();renderStats(curTab);}
-function saveFixedToTotal(){
-  persistFixed();
-  let fixedList=getFixedForMonth(curYM);
-  fixedList.forEach(f=>{
-    if(!masterBands.find(b=>b.name===f.name && b.section==='expense')){
-      masterBands.push({id:f.id,name:f.name,section:'expense'});
-    }
-  });
-  persist();
-  renderStats(curTab);
-  renderTotal();
-  toast('✅ اتحفظت الثابتة في الإجمالي');
-  switchTab('total');
-}
 function deleteFixed(id){if(!confirm('تمسح البند؟'))return;fixedTemplates=fixedTemplates.filter(x=>x.id!==id);Object.keys(fixedByMonth).forEach(ym=>{fixedByMonth[ym]=fixedByMonth[ym].filter(x=>x.id!==id)});persistFixed();renderFixedSection();renderStats(curTab);}
 function doSync(){
   try{ 
@@ -424,15 +411,6 @@ function renderTotal(){
       html+=`</tbody></table></div></div>`; return;
     }
     let bands=masterBands.filter(b=>b.section===sec.key);
-    // ضيف الثابتة للمصروف
-    if(sec.key==='expense'){
-      let fixedList=getFixedForMonth(curYM);
-      fixedList.forEach(f=>{
-        if(!bands.find(b=>b.name===f.name)){
-          bands.push({name:f.name,section:'expense',isFixed:true,amount:f.amount});
-        }
-      });
-    }
     const existNames=new Set(bands.map(b=>b.name));
     transactions.filter(sec.filter).forEach(t=>{
       const nm=(t.person||t.item||'').trim();
@@ -489,4 +467,8 @@ function renderGeneral(){
     let data=[];
     for(let m=1;m<=12;m++){
       let ym=`${year}-${String(m).padStart(2,'0')}`;
-      let monthTx=trans
+      let monthTx=transactions.filter(t=>t.date&&t.date.startsWith(ym));
+      let inc=monthTx.filter(t=>t.type==='income').reduce((s,x)=>s+Number(x.amount),0);
+      let exp=monthTx.filter(t=>t.type==='expense').reduce((s,x)=>s+Number(x.amount),0);
+      let fixedSum=0;
+      try{ if(fixedByMonth[ym]) fixedSum=fixedByMonth[ym].reduce((a,b)=>a+(Number(b.amount)||
