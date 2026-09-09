@@ -26,21 +26,17 @@ body{display:flex;justify-content:center;align-items:flex-start;background:var(-
 .nav button{flex:1;height:100%;border:none;background:transparent;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;border-radius:14px;color:var(--text-soft);font-size:10px;font-weight:700;cursor:pointer;touch-action:manipulation}
 .nav button.active{background:var(--hero);color:#fff}
 .nav button .icon{font-size:19px}
-#syncStatus{position:absolute;top:60px;left:10px;right:10px;z-index:20;text-align:center;pointer-events:none;font-size:9px;color:var(--text-soft)}
-/* زر المسح */
-#clearCacheBtn{position:absolute;top:10px;left:10px;z-index:50;background:#fef2f2;color:#ef4444;border:1px solid #fecaca;border-radius:8px;padding:4px 8px;font-size:8px;font-weight:900;display:none}
+#syncStatus{transition:.2s}
 </style>
 </head>
 <body>
 <div class="phone-shell">
   <div class="header">
-    <b>نظام عمر</b>
+    <div style="display:flex;gap:8px;align-items:center"><b>نظام عمر</b><span id="syncStatus" style="font-size:8px;background:var(--bg-soft);color:var(--text-soft);padding:3px 8px;border-radius:99px;font-weight:800;border:1px solid var(--card-border)">🟢 متصل</span></div>
     <div style="display:flex;gap:8px;align-items:center">
-      <button id="clearCacheBtn" onclick="clearAllCache()">مسح الكاش</button>
       <div class="theme-toggle" id="themeToggle" onclick="toggleTheme()"><div class="knob" id="themeKnob">☀️</div></div>
     </div>
   </div>
-  <div id="syncStatus"></div>
   <div class="pageWrap">
     <iframe data-page="daily.html" src="daily.html?v=19" class="page active" title="daily" id="frame-daily"></iframe>
     <iframe data-page="attendance.html" src="about:blank" class="page" title="attendance" id="frame-att"></iframe>
@@ -55,26 +51,7 @@ body{display:flex;justify-content:center;align-items:flex-start;background:var(-
 <script src="drive.js?v=19"></script>
 <script src="drive-sync.js?v=19"></script>
 <script>
-// لو فيه كاش قديم عالق على الموبايل - اظهر زر المسح
-try{
-  if(localStorage.getItem('omar_old_cache_detected')){
-    document.getElementById('clearCacheBtn').style.display='block';
-  }
-}catch(e){}
-
-function clearAllCache(){
-  if(!confirm('امسح الكاش القديم واعمل ريفرش؟')) return;
-  try{
-    if('caches' in window){
-      caches.keys().then(k=>k.forEach(cache=>caches.delete(cache)));
-    }
-    if('serviceWorker' in navigator){
-      navigator.serviceWorker.getRegistrations().then(rs=>rs.forEach(r=>r.unregister()));
-    }
-    localStorage.removeItem('omar_old_cache_detected');
-    location.reload(true);
-  }catch(e){ location.reload(true); }
-}
+// تم حذف زر مسح الكاش نهائياً
 
 const themes = {
   teal: {'--bg':'#F0FDFA','--bg-soft':'#CCFBF1','--card':'#FFFFFF','--card-border':'#5EEAD4','--text':'#134E4A','--text-soft':'#0D9488','--hero':'#0F766E','--nav-bg':'rgba(255,255,255,0.92)'},
@@ -124,15 +101,8 @@ function switchPage(name,btn){
 
 applyTheme(localStorage.getItem('omar_theme')||'teal');
 
-// تسجيل السيرفس ووركر الجديد وامسح القديم
+// تسجيل السيرفس ووركر
 if('serviceWorker' in navigator){
-  navigator.serviceWorker.getRegistrations().then(rs=>{
-    rs.forEach(r=>{
-      if(r.active && r.active.scriptURL && !r.active.scriptURL.includes('v19')){
-        try{ r.unregister(); localStorage.setItem('omar_old_cache_detected','1'); document.getElementById('clearCacheBtn').style.display='block'; }catch(e){}
-      }
-    });
-  });
   navigator.serviceWorker.register('./sw.js?v=19').then(()=>console.log('SW v19')).catch(()=>{});
 }
 

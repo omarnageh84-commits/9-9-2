@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
 <title>المهام</title>
-<script src="themes.js"></script>
+<script src="themes.js?v=20"></script>
 <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@700;800;900&family=IBM+Plex+Sans+Arabic:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
 *{box-sizing:border-box;margin:0;padding:0;font-family:'Tajawal','IBM Plex Sans Arabic',sans-serif}
@@ -953,10 +953,34 @@ function checkReminders(){
     }
   });
 }
-try{let cur=localStorage.getItem('omar_theme')||'green';if(window.applyTheme)applyTheme(cur,false);}catch(e){}
+try{let cur=localStorage.getItem('omar_theme')||'teal';if(window.applyTheme)applyTheme(cur,false);}catch(e){}
 if('Notification' in window && Notification.permission==='default'){Notification.requestPermission();}
 setInterval(checkReminders,30000);
 renderManagerLists();render();checkReminders();
 </script>
+
+<script>
+// توحيد الثيم النهائي - يخلي المهام زي اليومية والحضور
+(function(){
+  const originalApply = window.applyTheme;
+  window.applyTheme = function(name, save=true){
+    const map = {
+      teal: {'--bg':'#F0FDFA','--bg-soft':'#CCFBF1','--card':'#FFFFFF','--card-border':'#5EEAD4','--text':'#134E4A','--text-soft':'#0D9488','--hero':'#0F766E'},
+      green: {'--bg':'#F0FDFA','--bg-soft':'#CCFBF1','--card':'#FFFFFF','--card-border':'#5EEAD4','--text':'#134E4A','--text-soft':'#0D9488','--hero':'#0F766E'},
+      light: {'--bg':'#F0FDFA','--bg-soft':'#CCFBF1','--card':'#FFFFFF','--card-border':'#5EEAD4','--text':'#134E4A','--text-soft':'#0D9488','--hero':'#0F766E'},
+      dark: {'--bg':'#020617','--bg-soft':'#1E293B','--card':'#0F172A','--card-border':'#1E293B','--text':'#F1F5F9','--text-soft':'#94A3B8','--hero':'#0F766E'}
+    };
+    let tcol = map[name] || map.teal;
+    Object.entries(tcol).forEach(([k,v])=> document.documentElement.style.setProperty(k,v));
+    if(save) try{localStorage.setItem('omar_theme', name);}catch(e){}
+    // لو الاصلي موجود ناديه برضه
+    if(originalApply && originalApply !== window.applyTheme){
+      try{ originalApply(name, false); }catch(e){}
+    }
+  };
+  try{ window.applyTheme(localStorage.getItem('omar_theme')||'teal', false); }catch(e){}
+})();
+</script>
+
 </body>
 </html>

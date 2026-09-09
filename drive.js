@@ -1,4 +1,4 @@
-// drive-lite.js - محدث بالرابط الجديد ومتطابق تماماً مع باقي النظام
+// drive-lite.js - موحد + Debounced + مستقر
 window.SCRIPT_URL = window.SCRIPT_URL || 'https://script.google.com/macros/s/AKfycbz3TyAm_BWEzlgEcqjqYA6SaBMjoLzN3j51Ewb9vp6UZNL8yJespFDUKQxWA5IOvrvW/exec';
 
 window.db = window.db || {
@@ -6,24 +6,30 @@ window.db = window.db || {
   tasks: [],
   attendance: [],
   master: { wallets:['كاش','فودافون كاش','انستا باي'], incomeCats:['راتب'], expenseCats:['اكل'], debtPersons:[], amanatPersons:[] },
-  theme: 'nile',
+  theme: 'teal',
   lastSync: null
 };
 
-// تحميل محلي سريع أولاً
 try{
   let local = localStorage.getItem('app-omar-db');
   if(local){
     let parsed = JSON.parse(local);
     window.db = Object.assign(window.db, parsed);
   }
-}catch(e){ console.warn(e); }
+}catch(e){}
 
-function updateSyncStatus(txt, color){
+let _saveTimer = null;
+let _isSaving = false;
+
+function updateSyncStatus(txt){
   let el = document.getElementById('syncStatus');
   if(!el) return;
-  el.textContent = txt;
-  el.className = `text-xs px-2.5 py-1 rounded-full font-bold border ${color}`;
+  // لو في الهيدر فوق - نخليه بسيط
+  if(el.parentElement && el.parentElement.classList.contains('header') || el.tagName==='SPAN'){
+    el.textContent = txt;
+  } else {
+    el.textContent = txt;
+  }
 }
 
 window.saveToLocal = function(){
@@ -32,11 +38,24 @@ window.saveToLocal = function(){
   }catch(e){}
 }
 
-window.saveToDrive = async function(){
+window.saveToDrive = function(){
+  // debounced save - ده اللي هيحل مشكلة مرة يرفع ومرة لا
   window.saveToLocal();
-  updateSyncStatus('جاري الرفع... 🔄', 'bg-yellow-50 text-yellow-700 border-yellow-200');
+  if(_saveTimer) clearTimeout(_saveTimer);
+  _saveTimer = setTimeout(()=>{ _doSaveToDrive(); }, 700);
+}
+
+async function _doSaveToDrive(){
+  if(_isSaving) {
+    // لو بيرفع حاليا - اجلها شوية
+    _saveTimer = setTimeout(()=>{ _doSaveToDrive(); }, 1000);
+    return;
+  }
+  _isSaving = true;
+  updateSyncStatus('⏳ جاري الرفع...');
   if(!window.SCRIPT_URL || window.SCRIPT_URL.includes('YOUR_SCRIPT_ID')){
-    updateSyncStatus('محلي فقط 💾', 'bg-gray-100 text-gray-600 border-gray-200');
+    updateSyncStatus('💾 محلي');
+    _isSaving = false;
     return;
   }
   try{
@@ -44,36 +63,40 @@ window.saveToDrive = async function(){
       daily: JSON.parse(localStorage.getItem('omar_tx_v3') || '[]'),
       tasks: JSON.parse(localStorage.getItem('omar_tasks_v1') || '[]'),
       attendance: JSON.parse(localStorage.getItem('att_fixed_final') || '{}'),
+      cats: JSON.parse(localStorage.getItem('omar_cats_v1') || '[]'),
+      att_hols: JSON.parse(localStorage.getItem('att_hols_fixed') || '{}'),
+      att_notes: JSON.parse(localStorage.getItem('att_notes') || '{}'),
       db: window.db,
       timestamp: new Date().toISOString()
     };
-
     let payload = {
       fileName: "all_project_data.json",
       content: allData
     };
-
     await fetch(window.SCRIPT_URL, {
       method: 'POST',
       mode: 'no-cors',
       headers: { 'Content-Type': 'text/plain' },
       body: JSON.stringify(payload)
     });
-    
     window.db.lastSync = new Date().toISOString();
     window.saveToLocal();
-    updateSyncStatus('اترفع الآن ✅ ' + new Date().toLocaleTimeString('ar-EG'), 'bg-emerald-50 text-emerald-700 border-emerald-200');
-    setTimeout(()=> updateSyncStatus('متصل الآن 🟢', 'bg-emerald-50 text-emerald-700 border-emerald-200'), 2000);
+    updateSyncStatus('✅ اترفع ' + new Date().toLocaleTimeString('ar-EG'));
+    setTimeout(()=> updateSyncStatus('🟢 متصل الآن'), 2500);
   }catch(err){
-    console.error('[DRIVE-LITE] save error', err);
-    updateSyncStatus('خطأ رفع ⚠️', 'bg-red-50 text-red-700 border-red-200');
+    console.error('[DRIVE] save error', err);
+    updateSyncStatus('⚠️ خطأ رفع');
+  } finally {
+    _isSaving = false;
   }
 }
 
+window.saveToDriveNow = _doSaveToDrive;
+
 window.loadFromDrive = async function(){
-  updateSyncStatus('جاري التحميل... 🔄', 'bg-blue-50 text-blue-700 border-blue-200');
+  updateSyncStatus('🔄 تحميل...');
   if(!window.SCRIPT_URL || window.SCRIPT_URL.includes('YOUR_SCRIPT_ID')){
-    updateSyncStatus('محلي فقط 💾', 'bg-gray-100 text-gray-600 border-gray-200');
+    updateSyncStatus('💾 محلي');
     if(window.initApp) window.initApp();
     else if(window.renderContent) window.renderContent();
     return;
@@ -83,21 +106,19 @@ window.loadFromDrive = async function(){
     let json = await res.json();
     let payload = json.data || json;
     let content = payload.content || payload;
-    
     if(content){
       if(content.db) window.db = Object.assign(window.db, content.db);
       if(content.tasks) localStorage.setItem('omar_tasks_v1', JSON.stringify(content.tasks));
       if(content.daily) localStorage.setItem('omar_tx_v3', JSON.stringify(content.daily));
       if(content.attendance) localStorage.setItem('att_fixed_final', JSON.stringify(content.attendance));
-      
+      if(content.cats) localStorage.setItem('omar_cats_v1', JSON.stringify(content.cats));
+      if(content.att_hols) localStorage.setItem('att_hols_fixed', JSON.stringify(content.att_hols));
+      if(content.att_notes) localStorage.setItem('att_notes', JSON.stringify(content.att_notes));
       window.saveToLocal();
-      updateSyncStatus('متصل الآن 🟢 ' + new Date().toLocaleTimeString('ar-EG'), 'bg-emerald-50 text-emerald-700 border-emerald-200');
-    } else {
-      updateSyncStatus('متصل الآن 🟢', 'bg-emerald-50 text-emerald-700 border-emerald-200');
+      updateSyncStatus('🟢 متصل الآن');
     }
   }catch(err){
-    console.error('[DRIVE-LITE] load error', err);
-    updateSyncStatus('أوفلاين 📴', 'bg-gray-100 text-gray-600 border-gray-200');
+    updateSyncStatus('📴 أوفلاين');
   }
   if(window.initApp) window.initApp();
   else if(window.renderContent) window.renderContent();
@@ -106,5 +127,4 @@ window.loadFromDrive = async function(){
 window.addEventListener('DOMContentLoaded', ()=>{
   window.loadFromDrive();
 });
-
 window.addEventListener('online', ()=>{ window.loadFromDrive(); });

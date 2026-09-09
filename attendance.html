@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="ar" dir="rtl"><head><script src="themes.js"></script><style>
+<!DOCTYPE html><html lang="ar" dir="rtl"><head><script src="themes.js?v=20"></script><style>
 @font-face{font-family:"Optimistic";font-style:normal;font-weight:400 600;font-display:swap;src:url("/fonts/OptimisticAI_VF_Optimized.woff2") format("woff2")}
 @font-face{font-family:"Optimistic Mono";font-style:normal;font-weight:400;font-display:swap;src:url("/fonts/OptimisticMono_W_TextRegular.woff2") format("woff2")}
 :where(html){font-family:"Optimistic",system-ui,sans-serif}
@@ -116,4 +116,24 @@ renderAll();
 </script>
 <script src="drive.js"></script>
 <script src="drive-sync.js"></script>
+
+<script>
+// توحيد الثيم مع المهام
+window.applyTheme = function(name, save=true){
+  const map = {
+    teal: {'--bg':'#F0FDFA','--bg-soft':'#CCFBF1','--card':'#FFFFFF','--card-border':'#5EEAD4','--text':'#134E4A','--text-soft':'#0D9488','--hero':'#0F766E'},
+    green: {'--bg':'#F0FDFA','--bg-soft':'#CCFBF1','--card':'#FFFFFF','--card-border':'#5EEAD4','--text':'#134E4A','--text-soft':'#0D9488','--hero':'#0F766E'},
+    light: {'--bg':'#F0FDFA','--bg-soft':'#CCFBF1','--card':'#FFFFFF','--card-border':'#5EEAD4','--text':'#134E4A','--text-soft':'#0D9488','--hero':'#0F766E'},
+    dark: {'--bg':'#020617','--bg-soft':'#1E293B','--card':'#0F172A','--card-border':'#1E293B','--text':'#F1F5F9','--text-soft':'#94A3B8','--hero':'#0F766E'}
+  };
+  let t = map[name] || map.teal;
+  Object.entries(t).forEach(([k,v])=> document.documentElement.style.setProperty(k,v));
+  if(save) try{localStorage.setItem('omar_theme', name);}catch(e){}
+};
+try{
+  let s = localStorage.getItem('omar_theme') || 'teal';
+  window.applyTheme(s, false);
+}catch(e){}
+</script>
+
 </body></html>
