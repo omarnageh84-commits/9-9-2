@@ -1,6 +1,27 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
-<head>
+<head><style>
+@font-face {
+  font-family: "Optimistic";
+  font-style: normal;
+  font-weight: 400 600;
+  font-display: swap;
+  src: url("/fonts/OptimisticAI_VF_Optimized.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Optimistic Mono";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("/fonts/OptimisticMono_W_TextRegular.woff2") format("woff2");
+}
+:where(html) {
+  font-family: "Optimistic", system-ui, sans-serif;
+}
+:where(code, pre, kbd, samp) {
+  font-family: "Optimistic Mono", ui-monospace, monospace;
+}
+</style>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
 <title>المهام</title>
@@ -194,7 +215,7 @@ body{display:flex;flex-direction:column}
 
 <div id="managerModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:10000;align-items:center;justify-content:center;padding:14px"><div style="background:var(--card);width:100%;max-width:380px;border-radius:16px;padding:14px;border:1.5px solid var(--card-border)"><div style="display:flex;justify-content:space-between;margin-bottom:12px"><b style="font-size:13px">إدارة الفئات</b><button onclick="closeManager()" style="border:none;background:var(--bg-soft);width:30px;height:30px;border-radius:8px">✕</button></div><div style="display:flex;gap:6px;margin-bottom:10px"><input id="newCatEmoji" placeholder="📌" style="width:50px" class="input-pro"><input id="newCatName" placeholder="اسم الفئة" class="input-pro" style="flex:1"><button onclick="addCategory()" style="background:var(--hero);color:#fff;border:none;border-radius:10px;padding:9px 14px">+</button></div><div id="catList" style="max-height:200px;overflow:auto;display:flex;flex-direction:column;gap:6px;margin-bottom:10px"></div><div style="border-top:1.5px solid var(--card-border);padding-top:10px;margin-top:10px"><button onclick="clearAllData()" style="width:100%;background:#FFF1F2;color:#ef4444;border:1.5px solid #FECDD3;border-radius:10px;padding:10px;font-weight:900;font-size:11px">🗑️ مسح كل البيانات والبدء من جديد</button><div style="font-size:8px;color:var(--text-soft);margin-top:8px;text-align:center">💡 كود المخفي بيتغير من جوه تبويب المخفي فقط</div></div></div></div>
 <div id="proDeleteModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:20000;align-items:center;justify-content:center;padding:16px"><div style="background:var(--card);width:100%;max-width:340px;border-radius:20px;padding:18px;border:1.5px solid var(--card-border);text-align:center"><b>مسح المهمة؟</b><div style="display:flex;gap:8px;margin-top:14px"><button onclick="closeProDelete()" style="flex:1;background:var(--bg-soft);border:1.5px solid var(--card-border);border-radius:12px;padding:11px">إلغاء</button><button onclick="confirmProDelete()" style="flex:1;background:#ef4444;color:#fff;border:none;border-radius:12px;padding:11px">مسح</button></div></div></div>
-<div id="hiddenCodeModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:20000;align-items:center;justify-content:center;padding:16px;backdrop-filter:blur(6px)"><div style="background:var(--card);width:100%;max-width:340px;border-radius:20px;padding:18px;border:1.5px solid var(--card-border)"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px"><b style="font-size:13px">🔒 إعدادات المخفي</b><button onclick="closeHiddenCodeModal()" style="border:none;background:var(--bg-soft);width:30px;height:30px;border-radius:8px">✕</button></div><div style="background:#111;color:#fff;border-radius:12px;padding:12px;margin-bottom:12px"><div style="font-size:9px;opacity:.7">الكود الحالي</div><div id="hiddenCurrentCode" style="font-size:18px;font-weight:900;letter-spacing:2px;margin-top:4px">****</div><div style="font-size:8px;opacity:.6;margin-top:6px">اضغط على العين عشان تظهره</div></div><div style="display:flex;gap:6px;margin-bottom:10px"><input id="hiddenNewCodeInput" placeholder="الكود الجديد" type="password" class="input-pro" style="flex:1;font-size:16px;letter-spacing:2px"><button onclick="toggleHiddenCodeEye()" style="border:1.5px solid var(--card-border);background:var(--bg-soft);border-radius:10px;padding:8px 12px">👁️</button></div><div style="display:flex;gap:8px"><button onclick="closeHiddenCodeModal()" style="flex:1;background:var(--bg-soft);border:1.5px solid var(--card-border);border-radius:12px;padding:11px;font-weight:800">إلغاء</button><button onclick="saveHiddenCodeInside()" style="flex:1;background:#111;color:#fff;border:none;border-radius:12px;padding:11px;font-weight:900">💾 حفظ الكود</button></div><div style="font-size:8px;color:var(--text-soft);margin-top:10px;text-align:center">💡 الكود ده بس اللي بيفتح المخفي، محدش هيشوفه بره</div></div></div>
+<div id="hiddenCodeModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:20000;align-items:center;justify-content:center;padding:16px;backdrop-filter:blur(6px)"><div style="background:var(--card);width:100%;max-width:340px;border-radius:20px;padding:18px;border:1.5px solid var(--card-border)"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px"><b style="font-size:13px">🔒 إعدادات المخفي</b><button onclick="closeHiddenCodeModal()" style="border:none;background:var(--bg-soft);width:30px;height:30px;border-radius:8px">✕</button></div><div style="background:#111;color:#fff;border-radius:12px;padding:12px;margin-bottom:12px"><div style="font-size:9px;opacity:.7">الكود الحالي</div><div id="hiddenCurrentCode" style="font-size:18px;font-weight:900;letter-spacing:2px;margin-top:4px">****</div><div style="font-size:8px;opacity:.6;margin-top:6px">اضغط على العين عشان تظهره</div></div><div style="display:flex;gap:6px;margin-bottom:10px"><input id="hiddenNewCodeInput" placeholder="الكود الجديد" type="password" class="input-pro" style="flex:1;font-size:16px;letter-spacing:2px"><button onclick="toggleHiddenCodeEye()" style="border:1.5px solid var(--card-border);background:var(--bg-soft);border-radius:10px;padding:8px 12px">👁️</button></div><div style="text-align:center;margin-bottom:10px"><button onclick="forgotHiddenCode()" style="border:none;background:transparent;color:#ef4444;font-size:9px;font-weight:800;text-decoration:underline">نسيت الكود؟ امسحه وارجع للافتراضي 279</button></div><div style="display:flex;gap:8px"><button onclick="closeHiddenCodeModal()" style="flex:1;background:var(--bg-soft);border:1.5px solid var(--card-border);border-radius:12px;padding:11px;font-weight:800">إلغاء</button><button onclick="saveHiddenCodeInside()" style="flex:1;background:#111;color:#fff;border:none;border-radius:12px;padding:11px;font-weight:900">💾 حفظ الكود</button></div><div style="font-size:8px;color:var(--text-soft);margin-top:10px;text-align:center">💡 الكود ده بس اللي بيفتح المخفي، محدش هيشوفه بره</div></div></div>
 <div id="toastContainer"></div>
 <script>
 // إعدادات المزامنة مع جوجل درايف (ملف واحد موحد لجميع البيانات) بالرابط الجديد
@@ -340,9 +361,9 @@ function setFilter(n){
   render();
 }
 function handleSearchInput(v){
-  let code=localStorage.getItem('omar_hidden_code_v1')||'27943';
+  let code=localStorage.getItem('omar_hidden_code_v1')||'279';
   let t=v.trim();
-  if(t===code || t==='27943' || t==='56884' || t==='6455454'){
+  if(t===code || t==='279' || t==='56884' || t==='6455454'){
     hiddenVisible=true;
     curFilter='مخفي';
     render();
@@ -351,7 +372,7 @@ function handleSearchInput(v){
   }
 }
 function openHiddenCodeSettings(){
-  let cur=localStorage.getItem('omar_hidden_code_v1')||'27943';
+  let cur=localStorage.getItem('omar_hidden_code_v1')||'279';
   document.getElementById('hiddenCurrentCode').textContent='****';
   document.getElementById('hiddenCurrentCode').dataset.real=cur;
   document.getElementById('hiddenNewCodeInput').value='';
@@ -363,6 +384,13 @@ function toggleHiddenCodeEye(){
   let inp=document.getElementById('hiddenNewCodeInput');
   if(el.textContent==='****'){ el.textContent=el.dataset.real||''; inp.type='text'; } else { el.textContent='****'; inp.type='password'; }
 }
+function forgotHiddenCode(){
+  if(!confirm('نسيت الكود؟ هيمسح الكود الحالي ويرجع للافتراضي 279. المهام المخفية هتفضل موجودة بس هتحتاج الكود الجديد. متأكد؟')) return;
+  localStorage.removeItem('omar_hidden_code_v1');
+  closeHiddenCodeModal();
+  showToast('تم مسح الكود - رجع 279 ✅');
+}
+
 function saveHiddenCodeInside(){
   let v=document.getElementById('hiddenNewCodeInput').value.trim();
   if(!v){ showToast('اكتب الكود الجديد'); return; }
@@ -380,8 +408,8 @@ function renderBoardOnly(){
   else if(curFilter==='مخفي'){ list=list.filter(t=> (t.cat||'').trim() === 'مخفي'); }
   else{ list=list.filter(t=> (t.cat||'').trim() === curFilter.trim()); }
   if(q && q.length>1){
-    let code=localStorage.getItem('omar_hidden_code_v1')||'27943';
-    if(q!==code && q!=='27943' && q!=='56884' && q!=='6455454'){ list=list.filter(t=> (t.text||'').toLowerCase().includes(q)); }
+    let code=localStorage.getItem('omar_hidden_code_v1')||'279';
+    if(q!==code && q!=='279' && q!=='56884' && q!=='6455454'){ list=list.filter(t=> (t.text||'').toLowerCase().includes(q)); }
   }
   if(!list.length){ board.innerHTML=`<div style="text-align:center;padding:40px 10px;color:var(--text-soft)"><div style="font-size:40px">📭</div><div style="font-size:12px;font-weight:800;margin-top:8px">مفيش مهام هنا</div><div style="font-size:9px;margin-top:4px">${curFilter==='مخفي'?'المخفي فاضي - دوس + إضافة':'دوس + إضافة'}</div></div>`; return; }
   board.innerHTML=list.map(t=>{ let prog=getProgress(t); let catObj=cats.find(c=>c.name===t.cat); let emoji=catObj?catObj.emoji:(t.cat==='مخفي'?'🔒':'📌'); let bg=t.color||'var(--hero)'; return `<div class="task-outer"><div class="task-card" onclick="editTask('${t.id}')"><div class="task-progress-bg" style="width:${prog}%;background:${bg}"></div><div class="task-card-content"><div style="width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;background:var(--bg-soft);border:1px solid var(--card-border);flex-shrink:0">${emoji}</div><div class="task-info"><b style="${t.done?'text-decoration:line-through;opacity:.6':''}">${t.text||'بدون عنوان'}</b><small>${t.cat||'عام'} • ${t.priority||'عادي'} ${t.subs?.length?`• ${t.subs.filter(s=>s.done).length}/${t.subs.length}`:''} ${prog?`• ${prog}%`:''} ${t.reminder?.time?'• 🔔':''}</small></div><div class="task-check ${t.done?'done':''}" onclick="event.stopPropagation();toggleDone('${t.id}')">${t.done?'✓':''}</div></div></div><button class="ext-del" onclick="openProDelete('${t.id}')">✕</button></div>`; }).join('');
@@ -401,8 +429,8 @@ function render(){
     list=list.filter(t=> (t.cat||'').trim() === curFilter.trim());
   }
   if(q && q.length>1){
-    let code=localStorage.getItem('omar_hidden_code_v1')||'27943';
-    if(q!==code && q!=='27943' && q!=='56884' && q!=='6455454'){
+    let code=localStorage.getItem('omar_hidden_code_v1')||'279';
+    if(q!==code && q!=='279' && q!=='56884' && q!=='6455454'){
       list=list.filter(t=> (t.text||'').toLowerCase().includes(q));
     }
   }
@@ -441,7 +469,7 @@ function render(){
 function toggleDone(id){let t=tasks.find(x=>x.id===id);if(!t)return;t.done=!t.done;if(t.subs)t.subs.forEach(s=>s.done=t.done);saveLS();render();}
 function quickAdd(v){
   if(!v||!v.trim()){showToast('اكتب اسم المهمة');return;}
-  let code=localStorage.getItem('omar_hidden_code_v1')||'27943';
+  let code=localStorage.getItem('omar_hidden_code_v1')||'279';
   let isHidden = v.trim().startsWith(code+' ')||v.trim().startsWith('27943 ')||v.trim().startsWith('56884 ')||v.trim().startsWith('6455454 ');
   let txt = isHidden ? v.trim().split(' ').slice(1).join(' ').trim() : v.trim();
   if(!txt){showToast('اكتب اسم بعد الكود');return;}
@@ -982,5 +1010,5 @@ renderManagerLists();render();checkReminders();
 })();
 </script>
 
-</body>
+<script>(function(){var loc=location.href.replace(/#.*$/,"");var ATTR_NAMES=["data-product-id","data-productid","data-product_id","product-id","productid","product_id","data-source-entity-id","source-entity-id","source_entity_id","data-product","data-metadata","data-meta"];var DATASET_KEYS=["productId","productid","product_id","sourceEntityId","sourceentityid","source_entity_id","product","metadata","meta"];function readProductId(value){if(typeof value!=="string"||value.length===0)return null;if(/^[0-9]{6,}$/.test(value))return value;var match=value.match(/(?:product(?:_|-)?id|source(?:_|-)?entity(?:_|-)?id)["'=:\s]+([0-9]{6,})/i);return match?match[1]:null}function extractProductId(start){for(var node=start;node&&node!==document.body;node=node.parentElement){for(var i=0;i<ATTR_NAMES.length;i++){var attrValue=node.getAttribute&&node.getAttribute(ATTR_NAMES[i]);var attrProductId=readProductId(attrValue);if(attrProductId)return attrProductId}var dataset=node.dataset||null;if(dataset){for(var j=0;j<DATASET_KEYS.length;j++){var dataValue=dataset[DATASET_KEYS[j]];var dataProductId=readProductId(dataValue);if(dataProductId)return dataProductId}}}return null}function isInlineMediaSlotElement(node){return !!(node&&node.getAttribute&&node.getAttribute("data-clippy-inline-media-slot")!==null)}function findInlineMediaSlot(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(isInlineMediaSlotElement(node))return node}return null}function readInlineMediaUrl(node){if(!node)return null;return node.getAttribute&&((node.getAttribute("data-clippy-inline-media-url")||node.getAttribute("data-url")||node.getAttribute("data_url")))||node.href||null}function stripHash(url){return String(url).replace(/#.*$/,"")}function urlsMatch(a,b){if(!a||!b)return false;try{return stripHash(new URL(a,loc).href)===stripHash(new URL(b,loc).href)}catch(_){return stripHash(a)===stripHash(b)}}function isFirstPartyReelUrl(value){try{var url=new URL(value,loc);if(url.protocol!=="https:")return false;var host=url.hostname.toLowerCase();var supported=host==="instagram.com"||host.endsWith(".instagram.com")||host==="facebook.com"||host.endsWith(".facebook.com");return supported&&/\/reels?\//i.test(url.pathname)}catch(_){return false}}function isInlineMediaUrlClick(node,href){var slot=findInlineMediaSlot(node);if(!slot)return false;var slotUrl=readInlineMediaUrl(slot);if(slotUrl)return urlsMatch(href,slotUrl);return isFirstPartyReelUrl(href)}function findDataHref(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(node.getAttribute){var href=node.getAttribute("data-href")||node.getAttribute("data-url");if(href)return{href:href,node:node}}}return null}var nativeOpen=window.open;window.open=function(url){if(parent!==window&&typeof url==="string"&&/^https?:\/\//.test(url)){parent.postMessage({type:"ecto:usercontent-link-click",href:url},"*");return null}return nativeOpen?nativeOpen.apply(window,arguments):null};document.addEventListener("click",function(e){var target=e.target instanceof Element?e.target:null;if(!target)return;if(parent===window)return;var a=target.closest?target.closest("a[href]"):null;if(a&&a.href&&/^https?:\/\//.test(a.href)&&a.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(a,a.href))return;var productId=extractProductId(target)||extractProductId(a);if(productId){e.preventDefault();parent.postMessage({type:"ecto-artifact-link-click",productId:productId},"*");return}e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:a.href},"*");return}var dataHref=findDataHref(target);if(dataHref&&/^https?:\/\//.test(dataHref.href)&&dataHref.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(dataHref.node,dataHref.href))return;e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:dataHref.href},"*")}},true)})();</script><script>(function(){var FOCUS_TYPE="ecto:artifact-focus-request";var CLOSE_TYPE="ecto:artifact-close-request";function focusArtifactDocument(){var body=document.body;if(!body)return;try{window.focus();}catch(e){}if(!body.hasAttribute("tabindex"))body.setAttribute("tabindex","-1");try{body.focus({preventScroll:true});}catch(e){try{body.focus();}catch(e2){}}}window.addEventListener("message",function(event){if(event.source!==window.parent)return;var data=event.data;if(!data||typeof data!=="object"||data.type!==FOCUS_TYPE)return;if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",focusArtifactDocument,{once:true});return;}focusArtifactDocument();});window.addEventListener("keydown",function(event){if(event.key!=="Escape")return;window.setTimeout(function(){if(event.defaultPrevented)return;window.parent.postMessage({type:CLOSE_TYPE},"*");},0);});})();</script></body>
 </html>
